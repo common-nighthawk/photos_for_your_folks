@@ -1,0 +1,17 @@
+h1 {
+  text-align: center;
+  font-family: 'Shadows Into Light', cursive;
+  margin-top: 0.5em;
+}
+
+.photo {
+  max-height: 100vh;
+  max-width: 100vw;
+}
+
+img {
+  max-height: 80vh;
+  max-width: 80vw;
+  display: block;
+  margin: auto;
+}
