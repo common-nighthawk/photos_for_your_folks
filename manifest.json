@@ -1,8 +1,9 @@
 {
   "name": "Photos For Your Folks",
   "description": "Displays a random photo from a Flickr album in your new tab.",
-  "version": "0.1",
+  "version": "0.2",
   "incognito": "split",
+  "permissions": ["storage"],
   "chrome_url_overrides": {
     "newtab": "index.html"
   },

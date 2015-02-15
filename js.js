@@ -1,9 +1,34 @@
-var apiKey = "";
-var photoSet = "72157650168410638";
+// var photoSet = "72157650168410638";
+var photoSet = "72157644403255928";
 var getSetUrl = "https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos&api_key=" + apiKey + "&photoset_id=" + photoSet + "&format=json&nojsoncallback=1";
 
 $(document).ready(function() {
   // getApiKey();
+
+  var albumNumber = 1;
+
+  $('[name=album_number]').bind('input', function() {
+    albumNumber = $(this).val();
+    console.log(albumNumber);
+
+    chrome.storage.sync.set({ 'albumNumber': albumNumber }, function(){
+      console.log('you just sent the number to storeage');
+    });
+
+    chrome.storage.sync.get(['albumNumber'], function(items){
+      console.log('you just got yo shit back');
+      var pop = items;
+      console.log(pop);
+
+      photoSet = pop['albumNumber'];
+      getSetUrl = "https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos&api_key=" + apiKey + "&photoset_id=" + photoSet + "&format=json&nojsoncallback=1";
+      updatePhoto(getSetUrl);
+
+    });
+
+
+  });
+
   updatePhoto(getSetUrl);
   setInterval(function () {
     updatePhoto(getSetUrl);
