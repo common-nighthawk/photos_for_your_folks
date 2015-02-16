@@ -1,46 +1,46 @@
-// var photoSet = "72157650168410638";
-var photoSet = "72157644403255928";
-var getSetUrl = "https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos&api_key=" + apiKey + "&photoset_id=" + photoSet + "&format=json&nojsoncallback=1";
+var defaultAlbum = "72157633136277722";
+var getDefaultUrl = "https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos&api_key=" + apiKey + "&photoset_id=" + defaultAlbum + "&format=json&nojsoncallback=1";
+var getSetUrl = getDefaultUrl;
 
 $(document).ready(function() {
-  // getApiKey();
+  var albumNumberFromChrome = null;
+  getAlbumNumberAndUpdatePhoto();
 
-  var albumNumber = 1;
-
-  $('[name=album_number]').bind('input', function() {
-    albumNumber = $(this).val();
-    console.log(albumNumber);
-
-    chrome.storage.sync.set({ 'albumNumber': albumNumber }, function(){
-      console.log('you just sent the number to storeage');
-    });
-
-    chrome.storage.sync.get(['albumNumber'], function(items){
-      console.log('you just got yo shit back');
-      var pop = items;
-      console.log(pop);
-
-      photoSet = pop['albumNumber'];
-      getSetUrl = "https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos&api_key=" + apiKey + "&photoset_id=" + photoSet + "&format=json&nojsoncallback=1";
-      updatePhoto(getSetUrl);
-
-    });
-
-
+  chrome.storage.onChanged.addListener(function(response, namespace) {
+    getAlbumNumberAndUpdatePhoto();
   });
 
-  updatePhoto(getSetUrl);
+  $('[name=album_number]').bind('input', function() {
+    chrome.storage.sync.set({ 'albumNumber': $(this).val() }, function(){
+    });
+  });
+
   setInterval(function () {
     updatePhoto(getSetUrl);
   }, 30000);
+
+  $('.help-button').click(function() {
+    if ($('.help').css('display') === 'none') {
+      $('.help').show();
+    } else {
+      $('.help').hide();
+    }
+  });
 });
 
 function updatePhoto(setUrl) {
   $.get(setUrl)
     .success(function(data) {
-      var photos = data.photoset.photo;
-      var randomPhoto = selectRandomPhoto(photos);
-      replacePhoto(randomPhoto.id);
+      if (data['stat'] === 'fail') {
+        getSetUrl = getDefaultUrl;
+        updatePhoto(getSetUrl);
+        $('h4').show();
+      } else {
+        if (setUrl !== getDefaultUrl) { $('h4').hide(); }
+        var photos = data.photoset.photo;
+        var randomPhoto = selectRandomPhoto(photos);
+        replacePhoto(randomPhoto.id);
+      }
     });
 }
 
@@ -58,8 +58,16 @@ function selectRandomPhoto(photos) {
   return photos[Math.floor(Math.random()*photos.length)];
 }
 
-function getApiKey() {
-  $.get('secrets.txt', function(data) {
-      console.log(data);
-    });
+function getAlbumNumberAndUpdatePhoto() {
+  chrome.storage.sync.get(['albumNumber'], function(response){
+    var chromeObjest = response;
+    albumNumberFromChrome = response['albumNumber'];
+    if (albumNumberFromChrome) {
+      $('[name=album_number]').val(albumNumberFromChrome);
+      getSetUrl = "https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos&api_key=" + apiKey + "&photoset_id=" + albumNumberFromChrome + "&format=json&nojsoncallback=1";
+    } else {
+      getSetUrl = getDefaultUrl;
+    }
+    updatePhoto(getSetUrl);
+  });
 }
