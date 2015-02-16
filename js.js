@@ -1,4 +1,4 @@
-var defaultAlbum = "72157633136277722";
+var defaultAlbum = "72157638967254754";
 var getDefaultUrl = "https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos&api_key=" + apiKey + "&photoset_id=" + defaultAlbum + "&format=json&nojsoncallback=1";
 var getSetUrl = getDefaultUrl;
 
@@ -32,9 +32,9 @@ function updatePhoto(setUrl) {
   $.get(setUrl)
     .success(function(data) {
       if (data['stat'] === 'fail') {
+        $('h4').show();
         getSetUrl = getDefaultUrl;
         updatePhoto(getSetUrl);
-        $('h4').show();
       } else {
         if (setUrl !== getDefaultUrl) { $('h4').hide(); }
         var photos = data.photoset.photo;
@@ -48,7 +48,23 @@ function replacePhoto(photoId) {
   var getPhotoUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + apiKey + "&photo_id=" + photoId + "&format=json&nojsoncallback=1";
   $.get(getPhotoUrl)
     .success(function(data) {
-      var photoSrc = data.sizes.size[8].source;
+      if (data.sizes.size[8]) {
+        var photoSrc = data.sizes.size[8].source;
+      } else if (data.sizes.size[7]) {
+        var photoSrc = data.sizes.size[7].source;
+      } else if (data.sizes.size[6]) {
+        var photoSrc = data.sizes.size[6].source;
+      } else if (data.sizes.size[5]) {
+        var photoSrc = data.sizes.size[5].source;
+      } else if (data.sizes.size[4]) {
+        var photoSrc = data.sizes.size[4].source;
+      } else if (data.sizes.size[3]) {
+        var photoSrc = data.sizes.size[3].source;
+      } else if (data.sizes.size[2]) {
+        var photoSrc = data.sizes.size[2].source;
+      } else {
+        var photoSrc = data.sizes.size[1].source;
+      }
       var imageTag = "<img src='" + photoSrc + "'>";
       $(".photo").html(imageTag);
     });
